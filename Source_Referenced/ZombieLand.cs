@@ -24,6 +24,7 @@ namespace Multiplayer.Compat
 
             PatchingUtilities.PatchUnityRand(AccessTools.Method(typeof(SubEffecter_ZombieShocker), "RandomZap"), false);
             PatchingUtilities.PatchUnityRand(AccessTools.Method(typeof(SubEffecter_ZombieShocker), "ZapNextCell"), false);
+            PatchingUtilities.PatchUnityRand(AccessTools.Method(typeof(Tools), "CastBumpMote"), false);
 
             var transpiler = new HarmonyMethod(typeof(ZombieLand), nameof(ReplaceCoroutineCall));
             MpCompat.harmony.Patch(
