@@ -1,7 +1,9 @@
-﻿using System.Collections;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Multiplayer.API;
 using RimWorld;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace Multiplayer.Compat
@@ -84,6 +86,19 @@ namespace Multiplayer.Compat
                     prefix: new HarmonyMethod(typeof(Hospitality), nameof(PreCell)),
                     finalizer: new HarmonyMethod(typeof(Hospitality), nameof(PostCell)));
             }
+
+            // MultiFaction: filter pawn list to real player faction
+            {
+                var type = AccessTools.TypeByName("Hospitality.MainTab.MainTabWindow_Hospitality");
+                MpCompat.harmony.Patch(AccessTools.PropertyGetter(type, "Pawns"),
+                    postfix: new HarmonyMethod(typeof(Hospitality), nameof(FilterPawnsToRealFaction)));
+            }
+
+            // MultiFaction: reassign HostFaction to bed owner's faction when guest claims a bed
+            {
+                MpCompat.harmony.Patch(AccessTools.DeclaredMethod("Hospitality.CompGuest:ClaimBed"),
+                    postfix: new HarmonyMethod(typeof(Hospitality), nameof(PostClaimBed)));
+            }
         }
 
         private static bool NoAlertInMp(ref AlertReport __result)
@@ -154,6 +169,21 @@ namespace Multiplayer.Compat
             // Restore data to the state it was beforehand
             if (__state != null)
                 syncFields() = __state;
+        }
+
+
+        private static void FilterPawnsToRealFaction(ref IEnumerable<Pawn> __result)
+        {
+            if (!MP.IsInMultiplayer) return;
+            __result = __result.Where(p => p.guest.HostFaction == MP.RealPlayerFaction);
+        }
+
+        private static void PostClaimBed(ThingComp __instance, Building_Bed newBed)
+        {
+            if (!MP.IsInMultiplayer) return;
+            if (__instance.parent is not Pawn pawn) return;
+            if (pawn.ownership.OwnedBed != newBed) return; // claim failed
+            pawn.guest.SetGuestStatus(newBed.Faction);
         }
     }
 }
