@@ -345,8 +345,15 @@ namespace Multiplayer.Compat
         {
             public static void Prefix(Window_NeuralMatrixManagement __instance)
             {
-                FieldNeuralStackAutoLoad.Watch(__instance.selectedStack.ThingHolder as NeuralStack);
+                DontSync.SetValue(null, false);
+                NeuralStack neuralStack = __instance.selectedStack?.ThingHolder as NeuralStack;
+                if (neuralStack != null)
+                {
+                    Log.Warning($"{neuralStack} {neuralStack.autoLoad}");
+                    FieldNeuralStackAutoLoad.Watch(neuralStack);
+                }
             }
+            public static void Finalizer() => DontSync.SetValue(null, true);
         }
         static class Building_SleeveGestator_StartGrowth_Patch
         {
