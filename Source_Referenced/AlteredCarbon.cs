@@ -26,7 +26,7 @@ namespace Multiplayer.Compat
 
         static FieldInfo DontSync;
         static FieldInfo UseLocalIdsOverride;
-        static FieldInfo IgnoreTraces;
+        //static FieldInfo IgnoreTraces;
 
         //A Buncccccccccccccch of infos ok I admit AlteredCarbon is a BIG mod
         //Should turn to referenced.
@@ -82,7 +82,7 @@ namespace Multiplayer.Compat
             //MP stuffs
             DontSync = AccessTools.Field(AccessTools.TypeByName("Multiplayer.Client.Multiplayer"), "dontSync");
             UseLocalIdsOverride = AccessTools.Field(AccessTools.TypeByName("Multiplayer.Client.Patches.UniqueIdsPatch"), "useLocalIdsOverride");
-            IgnoreTraces = AccessTools.Field(AccessTools.TypeByName("Multiplayer.Client.Desyncs.DeferredStackTracing"), "ignoreTraces");
+            //IgnoreTraces = AccessTools.Field(AccessTools.TypeByName("Multiplayer.Client.Desyncs.DeferredStackTracing"), "ignoreTraces");
 
             MpCompat.harmony.Patch(AccessTools.Method(typeof(Pawn_NeedsTracker), "ShouldHaveNeed"),
                 prefix: new HarmonyMethod(typeof(Pawn_NeedsTracker_ShouldHaveNeed_Patch), nameof(Pawn_NeedsTracker_ShouldHaveNeed_Patch.Prefix)));
@@ -174,13 +174,13 @@ namespace Multiplayer.Compat
                 DontSync.SetValue(null, true);
                 prevUseLocalId = (bool)UseLocalIdsOverride.GetValue(null);
                 UseLocalIdsOverride.SetValue(null, true);
-                IgnoreTraces.SetValue(null, (int)IgnoreTraces.GetValue(null) + 1);
+                //IgnoreTraces.SetValue(null, (int)IgnoreTraces.GetValue(null) + 1);
                 Rand.PushState();
             }
             public static void Finalizer()
             {
                 Rand.PopState();
-                IgnoreTraces.SetValue(null, (int)IgnoreTraces.GetValue(null) - 1);
+                //IgnoreTraces.SetValue(null, (int)IgnoreTraces.GetValue(null) - 1);
                 DontSync.SetValue(null, preDontSync);
                 UseLocalIdsOverride.SetValue(null, prevUseLocalId);
             }
